@@ -2,16 +2,24 @@ name: PR Builder
 
 on:
   pull_request:
-    branches:
-    - main
+    branches: [main, master, dev]
 
 jobs:
-  build:
+  build-project:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Maven build
-        run: |
-          chmod +x script.sh
-          ./script.sh
+    - uses: action/checkout@v5
+    - name: Setup JDK v11 for x64
+      uses: actions/setup-java@v4
+      with:
+        java-version: '11'
+        distribution: 'temurin'
+        architecture: x64
+        cache: maven
+    - name: Run maven build
+      run: mvn clean package
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: Package
+        path: target/*.jar
